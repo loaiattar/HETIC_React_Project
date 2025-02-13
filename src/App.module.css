@@ -1,0 +1,33 @@
+.appContainer {
+  text-align: center;
+  font-family: 'VT323', monospace; 
+  background-color: #e9d0f4;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: center;
+  align-content: space-between;
+  gap: 30px;
+  padding: 15px;
+  background-color: #a67b8b;
+  border-radius: 5px;
+  font-family: 'Arial', 'sans serif'; 
+}
+
+  
+  .link {
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    padding: 10px 15px;
+    background-color: #4b516e;
+    border-radius: 5px;
+  }
+  
+  .link:hover {
+    background-color: #4b627a;
+  }
+  

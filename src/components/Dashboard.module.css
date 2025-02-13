@@ -1,0 +1,51 @@
+/* Dashboard.module.css */
+.dashboardContainer {
+    padding: 20px;
+    background-color: #fff;
+    font-family: 'VT323', monospace;
+  }
+  
+  .header {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .widgetContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .widget {
+    background: #e0e0e0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+  }
+  
+  .widget:hover {
+    transform: translateY(-2px);
+  }
+  
+  .foodWidget {
+    text-align: center;
+  }
+  
+  .foodImage {
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+  
+  .instructions {
+    font-size: 14px;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 10px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 4px;
+  }
