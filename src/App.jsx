@@ -15,9 +15,9 @@ function App() {
           <Link to="/editor" className={styles.link}>
             Editor
           </Link>
-          <Link to="/third" className={styles.link}>
+          {/* <Link to="/third" className={styles.link}>
              Third
-          </Link>
+          </Link> */}
         </nav>
 
         <Routes>
