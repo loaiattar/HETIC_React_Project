@@ -49,3 +49,28 @@
     background: rgba(255,255,255,0.5);
     border-radius: 4px;
   }
+
+  .fileContainer{
+    display: flex;
+    flex-direction: column;
+  }
+
+  .listContainer{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    list-style: none;
+  }
+
+  .btn{
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    padding: 10px 15px;
+    background-color: #4b516e;
+    border-radius: 5px;
+  }
+
+  .btn:hover {
+    background-color: #4b627a;
+  }
