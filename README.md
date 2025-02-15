@@ -1,3 +1,11 @@
+
+# Projet React
+
+Ce projet a été réaliser en groupe par : Elattar Loai, Marcheschi Thomas et Moussavi Ava.
+
+
+
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

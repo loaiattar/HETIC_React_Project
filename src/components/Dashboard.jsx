@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import styles from "./Dashboard.module.css";
+import { useNavigate } from "react-router";
 
 function Dashboard() {
   const [time, setTime] = useState(new Date().toLocaleTimeString());
@@ -7,6 +8,9 @@ function Dashboard() {
   const [joke, setJoke] = useState("Loading...");
   const [meal, setMeal] = useState({ name: "Loading...", image: "", instructions: "" });
   const [cocktail, setCocktail] = useState({ name: "Loading...", image: "", instructions: "" });
+  const [documents, setDocuments] = useState([]);
+  const navigate = useNavigate();
+
 
   const fetchQuote = async () => {
     try {
@@ -92,6 +96,18 @@ function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
+  function createFile(){
+    const newDocumentTitle = prompt('Name your new file');
+    if (newDocumentTitle){
+      setDocuments([...documents,newDocumentTitle]);
+      
+    }
+  }
+
+  function selectDocument(){
+    navigate(`/editor`);
+  }
+
   return (
     <div className={styles.dashboardContainer}>
       <h1 className={styles.header}>Welcome to the our site Dashboard</h1>
@@ -128,6 +144,22 @@ function Dashboard() {
           <p className={styles.instructions}>{cocktail.instructions}</p>
         </div>
       </div>
+      <hr/>      
+      <div className={styles.fileContainer}>
+
+        <h2>Markdown File</h2>
+        <button onClick={createFile} className={styles.btn}>
+          New file
+        </button>
+        <ul  className={styles.listContainer}>
+          {documents.map((document, index) =>(
+            <li key={index}>
+              <button onClick={selectDocument} className={styles.btn}>{document}</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
     </div>
   );
 }
