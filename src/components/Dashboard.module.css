@@ -1,14 +1,14 @@
 /* Dashboard.module.css */
 .dashboardContainer {
     padding: 20px;
-    background-color: #fff;
+    background-color: #090d28;
     font-family: 'VT323', monospace;
   }
   
   .header {
     font-size: 24px;
     font-weight: bold;
-    color: #333;
+    color: #bad3ea;
   }
   
   .widgetContainer {
@@ -19,7 +19,7 @@
   }
   
   .widget {
-    background: #e0e0e0;
+    background: #bad3ea;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -67,7 +67,7 @@
     color: #fff;
     font-weight: bold;
     padding: 10px 15px;
-    background-color: #4b516e;
+    background-color: #13af5a;
     border-radius: 5px;
   }
 

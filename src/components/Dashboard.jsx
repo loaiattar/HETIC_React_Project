@@ -1,6 +1,6 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Dashboard.module.css";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const [time, setTime] = useState(new Date().toLocaleTimeString());
@@ -9,125 +9,166 @@ function Dashboard() {
   const [meal, setMeal] = useState({ name: "Loading...", image: "", instructions: "" });
   const [cocktail, setCocktail] = useState({ name: "Loading...", image: "", instructions: "" });
   const [documents, setDocuments] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [location, setLocation] = useState({ city: "Loading...", country: "Loading..." });
   const navigate = useNavigate();
 
-
-  const fetchQuote = async () => {
+     // get your location API
+  const fetchUserLocation = async () => {
     try {
-      // First try the primary API
-      const response = await fetch("https://api.quotable.io/random");
-      if (!response.ok) {
-        throw new Error('First API Failed');
+      const res = await fetch("http://ip-api.com/json/");
+      const data = await res.json();
+      if (data.status === "success") {
+        setLocation({ city: data.city, country: data.country });
+      } else {
+        throw new Error("Location API failed");
       }
-      const data = await response.json();
-      setQuote(data.content);
     } catch (error) {
-      try {
-        // Fallback to backup API
-        const response = await fetch("https://api.goprogram.ai/inspiration");
-        const data = await response.json();
-        setQuote(data.quote);
-      } catch (backupError) {
-        // If both APIs fail, set a default quote
-        setQuote("Life is what happens while you are busy making other plans. - John Lennon");
-        console.error("Both quote APIs failed:", backupError);
-      }
+      console.error("Failed to fetch location", error);
+      setLocation({ city: "Unknown", country: "Unknown" });
     }
   };
+  
 
   useEffect(() => {
-    // Time update
     const timer = setInterval(() => {
       setTime(new Date().toLocaleTimeString());
     }, 1000);
+       // one function de handel all data API
+    const fetchData = async () => {
+      try {
+        const quoteRes = await fetch('https://type.fit/api/quotes');
+        if (!quoteRes.ok) throw new Error("Quote API Failed");
+        const quoteData = await quoteRes.json();
+        setQuote(`${quoteData.content} - ${quoteData.author}`);
+      } catch (error) {
+        console.warn("Quote API failed:", error);
+        setQuote("Life is what happens while you are busy making other plans. - John Lennon");
+      }
+      try {
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const day = today.getDate();
+        const historyRes = await fetch(`https://byabbe.se/on-this-day/${month}/${day}/events.json`); // to get only day and month events
+        if (!historyRes.ok) throw new Error("historical events API failed");
+        const historyData = await historyRes.json();
+        const selectedEvents = historyData.events.slice(0, 3).map(event => ({
+          year: event.year,
+          text: event.description
+        }));
+        setEvents(selectedEvents);
+      } catch (error) {
+        console.error("historical events API failed:", error);
+        setEvents([{ year: "none", text: "failed to get historical events." }]);
+      }
 
-    // Fetch quote with retry mechanism
-    fetchQuote();
 
-    // Fetch joke
-    fetch("https://v2.jokeapi.dev/joke/Any?type=single")
-      .then((res) => res.json())
-      .then((data) => setJoke(data.joke))
-      .catch(error => {
-        console.error("Joke API failed:", error);
+      try {
+        // Joke API
+        const jokeRes = await fetch("https://official-joke-api.appspot.com/random_joke");
+        if (!jokeRes.ok) throw new Error("Joke API Failed");
+        const jokeData = await jokeRes.json();
+        setJoke(`${jokeData.setup} ${jokeData.punchline}`);
+      } catch (error) {
+        console.warn("joke API failed:", error);
         setJoke("Why don't scientists trust atoms? Because they make up everything!");
-      });
+      }
 
-    // Fetch random meal
-    fetch("https://www.themealdb.com/api/json/v1/1/random.php")
-      .then((res) => res.json())
-      .then((data) => {
-        const mealData = data.meals[0];
+      try {
+        //meal API
+        const mealRes = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
+        if (!mealRes.ok) throw new Error("Meal API Failed");
+        const mealData = await mealRes.json();
         setMeal({
-          name: mealData.strMeal,
-          image: mealData.strMealThumb,
-          instructions: mealData.strInstructions
+          name: mealData.meals[0].strMeal,
+          image: mealData.meals[0].strMealThumb,
+          instructions: mealData.meals[0].strInstructions
         });
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("Meal API failed:", error);
         setMeal({
           name: "Classic Spaghetti",
           image: "https://via.placeholder.com/200x200?text=Meal",
           instructions: "API currently unavailable. Please try again later."
         });
-      });
+      }
 
-    // Fetch random cocktail
-    fetch("https://www.thecocktaildb.com/api/json/v1/1/random.php")
-      .then((res) => res.json())
-      .then((data) => {
-        const cocktailData = data.drinks[0];
+      try {
+        //  cocktail API
+        const listRes = await fetch("https://www.thecocktaildb.com/api/json/v1/1/filter.php?a=Non_Alcoholic");
+        if (!listRes.ok) throw new Error("Cocktail List API Failed");
+        const listData = await listRes.json();
+        const randomDrink = listData.drinks[Math.floor(Math.random() * listData.drinks.length)];
+        const detailRes = await fetch(`https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=${randomDrink.idDrink}`);
+        if (!detailRes.ok) throw new Error("Cocktail Detail API Failed");
+        const detailData = await detailRes.json();
         setCocktail({
-          name: cocktailData.strDrink,
-          image: cocktailData.strDrinkThumb,
-          instructions: cocktailData.strInstructions
+          name: detailData.drinks[0].strDrink,
+          image: detailData.drinks[0].strDrinkThumb,
+          instructions: detailData.drinks[0].strInstructions || "Instructions not available"
         });
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("Cocktail API failed:", error);
         setCocktail({
           name: "Basic Mojito",
           image: "https://via.placeholder.com/200x200?text=Cocktail",
           instructions: "API currently unavailable. Please try again later."
         });
-      });
+      }
+    };
+    fetchUserLocation();
+    fetchData();
 
     return () => clearInterval(timer);
   }, []);
 
-  function createFile(){
-    const newDocumentTitle = prompt('Name your new file');
-    if (newDocumentTitle){
-      setDocuments([...documents,newDocumentTitle]);
-      
+  function createFile() {
+    const newDocumentTitle = prompt("Name your new file");
+    if (newDocumentTitle) {
+      setDocuments(prevDocs => [...prevDocs, newDocumentTitle]);
+
     }
   }
 
-  function selectDocument(){
-    navigate(`/editor`);
+  function selectDocument(documentName) {
+    navigate(`/editor/${documentName}`);
   }
+  
+
 
   return (
     <div className={styles.dashboardContainer}>
-      <h1 className={styles.header}>Welcome to the our site Dashboard</h1>
+      <h1 className={styles.header}>Welcome to our site Dashboard <b>HETIC React project</b></h1>
       <div className={styles.widgetContainer}>
+      <div className={styles.widget}>
+          <div className={styles.widget}>
+            <strong>Your Location</strong>
+          </div>
+          <p className={styles.widget}>
+            <span className={styles.widget}>{location.city}</span>
+            {location.country && (
+              <>, <span className={styles.widget}>{location.country}</span></>
+            )}
+          </p>
+        </div>
         <div className={styles.widget}>
           <strong>Current Time:</strong> <br /> {time}
         </div>
         <div className={styles.widget}>
           <strong>Quote of the Day:</strong> <br /> {quote}
-          {quote === "Loading..." && (
-            <button 
-              onClick={fetchQuote} 
-              className={styles.retryButton}
-            >
-              Retry Loading Quote
-            </button>
-          )}
         </div>
         <div className={styles.widget}>
           <strong>Joke of the Day:</strong> <br /> {joke}
+        </div>
+        <div className={styles.widget}>
+          <strong>Historical Events on this Date:</strong>
+          <ul>
+            {events.map((event, index) => (
+              <li key={index}>
+                <strong>{event.year} :</strong> {event.text}
+              </li>
+            ))}
+          </ul>
         </div>
         <div className={`${styles.widget} ${styles.foodWidget}`}>
           <strong>Meal of the Day:</strong>
@@ -138,30 +179,25 @@ function Dashboard() {
         <div className={`${styles.widget} ${styles.foodWidget}`}>
           <strong>Cocktail of the Day:</strong>
           <h3>{cocktail.name}</h3>
-          {cocktail.image && (
-            <img src={cocktail.image} alt={cocktail.name} className={styles.foodImage} />
-          )}
+          {cocktail.image && <img src={cocktail.image} alt={cocktail.name} className={styles.foodImage} />}
           <p className={styles.instructions}>{cocktail.instructions}</p>
         </div>
       </div>
-      <hr/>      
+      <hr />
       <div className={styles.fileContainer}>
-
-        <h2>Markdown File</h2>
-        <button onClick={createFile} className={styles.btn}>
-          New file
-        </button>
-        <ul  className={styles.listContainer}>
-          {documents.map((document, index) =>(
+        <h2 className={styles.header}>Markdown File</h2>
+        <button onClick={createFile} className={styles.btn}>New file</button>
+        <ul className={styles.listContainer}>
+          {documents.map((document, index) => (
             <li key={index}>
-              <button onClick={selectDocument} className={styles.btn}>{document}</button>
+              <button onClick={selectDocument(document)} className={styles.btn}>{document}</button>
             </li>
           ))}
         </ul>
-      </div>
-
+     </div>
     </div>
   );
 }
 
 export default Dashboard;
+

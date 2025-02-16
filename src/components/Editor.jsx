@@ -7,11 +7,20 @@ function Editor() {
   const [markdown, setMarkdown] = useState(() => {
     return localStorage.getItem("markdown") || "";
   });
+  
+  const [title, setTitle] = useState(() => {
+    return localStorage.getItem("documentTitle") || "Untitled Document";
+  });
+  
   const textareaRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem("markdown", markdown);
   }, [markdown]);
+
+  useEffect(() => {
+    localStorage.setItem("documentTitle", title);
+  }, [title]);
 
   const insertFormatting = (format) => {
     const textarea = textareaRef.current;
@@ -52,7 +61,6 @@ function Editor() {
     const newText = markdown.substring(0, start) + formattedText + markdown.substring(end);
     setMarkdown(newText);
     
-    // Reset focus to textarea
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(
@@ -65,6 +73,10 @@ function Editor() {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Set the title to the filename without extension
+      const fileName = file.name.replace(/\.[^/.]+$/, "");
+      setTitle(fileName);
+
       const reader = new FileReader();
       reader.onload = (e) => setMarkdown(e.target.result);
       reader.readAsText(file);
@@ -73,20 +85,26 @@ function Editor() {
 
   const handleFileDownload = (format) => {
     if (format === 'md') {
-      const blob = new Blob([markdown], { type: "text/markdown" });
-      downloadFile(blob, "document.md");
+      // Include title as a header in the markdown content
+      const contentWithTitle = `# ${title}\n\n${markdown}`;
+      const blob = new Blob([contentWithTitle], { type: "text/markdown" });
+      downloadFile(blob, `${title}.md`);
     } else if (format === 'pdf') {
       const doc = new jsPDF();
-      const lines = doc.splitTextToSize(markdown, 180);
+      // Add title to PDF
+      doc.setFontSize(16);
+      doc.text(title, 15, 15);
+      // Add content
       doc.setFontSize(12);
-      doc.text(lines, 15, 20);
-      doc.save("document.pdf");
+      const lines = doc.splitTextToSize(markdown, 180);
+      doc.text(lines, 15, 25);
+      doc.save(`${title}.pdf`);
     } else if (format === 'html') {
       const htmlContent = `
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Markdown Export</title>
+            <title>${title}</title>
             <style>
               body {
                 font-family: Arial, sans-serif;
@@ -108,12 +126,13 @@ function Editor() {
             </style>
           </head>
           <body>
+            <h1>${title}</h1>
             ${document.querySelector('.preview').innerHTML}
           </body>
         </html>
       `;
       const blob = new Blob([htmlContent], { type: "text/html" });
-      downloadFile(blob, "document.html");
+      downloadFile(blob, `${title}.html`);
     }
   };
 
@@ -130,7 +149,15 @@ function Editor() {
 
   return (
     <div className={styles.editorContainer}>
-      <h1>Markdown Editor</h1>
+      <div className={styles.titleSection}>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={styles.titleInput}
+          placeholder="Enter document title..."
+        />
+      </div>
       <div className={styles.toolbar}>
         <button onClick={() => insertFormatting('bold')} title="Bold">
           <strong>B</strong>
@@ -148,10 +175,10 @@ function Editor() {
           H2
         </button>
         <button onClick={() => insertFormatting('link')} title="Insert Link">
-          🔗
+          link
         </button>
         <button onClick={() => insertFormatting('list')} title="Bullet List">
-          •
+          list
         </button>
         <button onClick={() => insertFormatting('code')} title="Code">
           &lt;/&gt;
@@ -183,6 +210,7 @@ function Editor() {
       </div>
       <h2>Preview</h2>
       <div className={`${styles.preview} preview`}>
+        <h1>{title}</h1>
         <ReactMarkdown>{markdown}</ReactMarkdown>
       </div>
     </div>
