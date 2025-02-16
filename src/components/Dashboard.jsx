@@ -88,7 +88,7 @@ function Dashboard() {
         console.error("Meal API failed:", error);
         setMeal({
           name: "Classic Spaghetti",
-          image: "https://via.placeholder.com/200x200?text=Meal",
+          image: "https://via.placeholder.com/200x200?text=Meal", //in case there is no images it will reserve an image placeholder to respect the design
           instructions: "API currently unavailable. Please try again later."
         });
       }
