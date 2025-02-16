@@ -4,6 +4,12 @@ import Dashboard from "./components/Dashboard";
 import Editor from "./components/Editor";
 import styles from "./App.module.css";
 
+// Add Montserrat font
+const montserratLink = document.createElement('link');
+montserratLink.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap';
+montserratLink.rel = 'stylesheet';
+document.head.appendChild(montserratLink);
+
 function App() {
   return (
     <Router>
@@ -15,9 +21,6 @@ function App() {
           <Link to="/editor" className={styles.link}>
             Editor
           </Link>
-          {/* <Link to="/third" className={styles.link}>
-             Third
-          </Link> */}
         </nav>
 
         <Routes>
